@@ -1,85 +1,119 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Aug  8 02:31:41 2021
+Created on Mon Apr 18 11:55:42 2022
 
 @author: fuwen
-
 """
-from bs4 import BeautifulSoup
-import json,requests,tld
 
-#阅读APP导出书源
-SharePath = r'D:\OneDrive\YueduBookSource\yck\yck.json'
+#import requests,json
+import pandas as pd
 
 
-
-#标题含有以下字符删除
-WordList = ['BadRequest','503','login','Attention','Error','404','Apache','Cloudflare','baidu','公益','提示','漫画','升级','安全','200','Apache','Found','Spring']
-
-def GetMainUrl(url):
-    hea = url.split('/')[0]
-    try:
-        obj = tld.get_tld(url,as_object=True)
-    except:
-        return 'http:'
-    if obj.subdomain =='':
-        Domain =hea + '//'+ obj.fld
+def replaceFomat(text: str, word: str, n: int,reverse=False):
+    '''对文本中的指定单词进行格式化的替换/替回
+    Params:
+    ---
+    text
+        要替换的文本
+    word
+        目标单词
+    n
+        目标单词的序号
+    reverse
+        是否进行替回
+    Return:
+    ---
+    new_text
+        替换后的文本
+    '''
+    # 构造【中间变量】
+    new_text = text[ : ]
+    fmt = "<{}>".format(n)
+    # 替换
+    if reverse is False:
+        new_text = new_text.replace(word, fmt)  # 格式化替换
+        return new_text
+    # 替回
+    elif reverse is True:
+        new_text = new_text.replace(fmt, word)  # 去格式化替换
+        return new_text
+    # 要求非法，引发异常
     else:
-        Domain = hea + '//' + obj.subdomain +'.'+ obj.fld
-    return Domain
+        raise TypeError
+def replaceMulti(text: str, olds: list, news: list):
+    '''一次替换多组字符串
+    Params:
+    ---
+    text
+        要替换的文本
+    olds
+        旧字符串列表
+    news
+        新字符串列表
+    Return:
+    ---
+    new_text: str
+        替换后的文本
+    '''
+    if len(olds) != len(news):
+        raise IndexError
+    else:
+        new_text = text[ : ]
+        # 格式化替换
+        i = 0  # 单词计数器
+        for word in olds:
+            i += 1
+            new_text = replaceFomat(new_text, word, i)
+        # 去格式化替回
+        i = 0  # 归零
+        for word in news:
+            i += 1
+            new_text = replaceFomat(new_text, word, i,True)
+        # 返回替换好的文本
+        return new_text
+#源Url
+bookSourceUrl = 'https://shuyuan.mgz6.cc/'
+def yuan(bookSourceUrl):
+    if bookSourceUrl[-1]=='/':
+        bookSourceUrl=bookSourceUrl[:-1]
+    if bookSourceUrl[-1]=='/':
+        bookSourceUrl=bookSourceUrl[:-1]
+    return bookSourceUrl
+#网站名称
+bookSourceName = '飞卢小说(分类最全)'
+def Name(bookSourceName):
+    bookSourceName = bookSourceName.split('(')[0] 
+    bookSourceName = bookSourceName.split('（')[0] 
+    return bookSourceName
+    
+#特殊字符
+olds = ['Ⓢ',' ','②','🔸','①','③','⑮','④','⑧','⑨','⑪','📜','💰', '🌾', '💫', '💰', '🔞', '💡',  '🐳', '✐', '🧾' ,'📒' ,'☆' ,'🈲' ,'📖', '❎', '☘️','📗','📙',
+        '🍩','🎉','🏷','🌸','🍅','🎊','👍','🎈','🔥','📚','📰','💜','📥','💗','🔰','👿']
+news = ['' for i in olds]
+
+url = 'https://shuyuan.mgz6.cc/shuyuan/a3231337446afe1ea5179b02737a8980.json'
+data = pd.read_json(url)
+#删除 源注释Comment
+data['bookSourceComment'] = ''
+#删除bookSourceUrl 签名
+data['bookSourceUrl'] =[ i.split('#')[0] for i in data['bookSourceUrl']]
+#书源名替换
+data['bookSourceName'] = [replaceMulti(i, olds, news) for i in data['bookSourceName'] ]
+data['bookSourceName'] = [Name(i) for i in data['bookSourceName']]
+#修改分组
+bookSourceList = []
+for bookSource in data['bookSourceGroup'] :
+    if bookSource =='':
+        bookSource = '一般书源'
+    bookSourceList.append(bookSource)
+data['bookSourceGroup']  = bookSourceList
+#源URL
+data['bookSourceUrl'] =[yuan(i) for i in data['bookSourceUrl']]
+#删除源Url相同数值
+data = data.drop_duplicates('bookSourceUrl',keep='first')
+#源Url重新排序
+data.sort_values("bookSourceName",inplace=True)
+#保存
+data.to_json('bookSource.json',orient='records',force_ascii=False,lines=False,indent=4)
 
 
-def Rename(title):
-    title = title.replace(' ','')
-    title = title.replace('\n','')
-    title = title.split('-')[0]
-    title = title.split('－')[0]
-    title = title.split('|')[0]
-    title = title.split('_')[0]
-    title = title.split('—')[0]
-    title = title.split(',')[0]
-    title = title.split('―')[0]
-    title = title.split('，')[0]
-    return title
-
-headers = {'User-Agent':'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5'}
-File = open(SharePath,'r', encoding='utf-8')
-FileText = File.read()
-JsonList = json.loads(FileText)
-NewJsonList = []
-Len =len(JsonList)
-count = 0
-for Json in JsonList:
-    print(Len-count)
-    count+=1
-    #删除有声小说书源
-    if Json['bookSourceType']==1:
-        continue
-    WebUrl = Json['bookSourceUrl']
-    WebUrl = GetMainUrl(WebUrl)
-    Json['bookSourceUrl']=WebUrl
-    #删除连接不上的书源
-    try:
-        rep = requests.get(WebUrl,headers = headers,timeout=10)
-    except:
-        continue
-    rep.encoding = rep.apparent_encoding
-    Soup = BeautifulSoup(rep.text,'html.parser')
-    try:
-        Title = Soup.title.string
-        Title = Rename(Title)
-    except:
-        continue
-    #修改标题
-    Json['bookSourceName'] = Title
-    #删除网站名称含关键词源
-    Isin = [i in Title for i in WordList]
-    if any(Isin):
-        continue
-    Json['bookSourceComment'] =''
-    Json['bookSourceGroup'] =''
-    NewJsonList.append(Json)
-NewJsonText = json.dumps(NewJsonList)
-
-with open('NewBookSource.json','w') as f:
-    json.dump(NewJsonList,f)
