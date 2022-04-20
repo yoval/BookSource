@@ -134,13 +134,14 @@ data['bookSourceUrl'] =[yuan(i) for i in data['bookSourceUrl']]
 #删除搜索链接为空的源
 for row in data.itertuples():
     searchUrl = row.searchUrl
-    if searchUrl == '':
+    if type(searchUrl) == float:
         data.drop(row.Index, inplace=True)
 #精简源
 bookUrlPatternList = [] #书籍Url正则
 exploreUrlList = [] #发现
 loginUrlList = [] #登录
 searchUrlList = [] #搜索
+sourceCommentList = [] #备注
 for row in data.itertuples():
     bookSourceUrl = row.bookSourceUrl
     bookUrlPattern = row.bookUrlPattern
@@ -156,10 +157,19 @@ for row in data.itertuples():
         loginUrl = ''
     loginUrlList.append(loginUrl)
     searchUrl = row.searchUrl
-    try:
-        searchUrl = searchUrl.replace(bookSourceUrl,'')
-    except:
-        searchUrl = ''
+    if '<js>' in searchUrl:
+        pass
+    else:
+        try:
+            searchUrl = searchUrl.replace(bookSourceUrl,'')
+        except:
+            searchUrl = ''
+    if 'https' in searchUrl:
+        sourceComment = '搜索可精简'
+    else:
+        sourceComment = ''
+    sourceCommentList.append(sourceComment)
+    
     searchUrlList.append(searchUrl)
     exploreUrl = row.exploreUrl
     try:
@@ -171,7 +181,7 @@ data['bookUrlPattern'] = bookUrlPatternList
 data['exploreUrl'] = exploreUrlList
 data['searchUrl'] = searchUrlList
 data['loginUrl'] = loginUrlList
-
+data['sourceComment'] = sourceCommentList
 
 #删除源Url相同数值
 data = data.drop_duplicates('bookSourceUrl',keep='first')
