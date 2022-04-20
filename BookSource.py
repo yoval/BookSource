@@ -5,7 +5,7 @@ Created on Mon Apr 18 11:55:42 2022
 @author: fuwen
 """
 
-#import requests,json
+import requests,re
 import pandas as pd
 
 
@@ -72,7 +72,7 @@ def replaceMulti(text: str, olds: list, news: list):
         # 返回替换好的文本
         return new_text
 #源Url
-bookSourceUrl = 'https://shuyuan.mgz6.cc/'
+bookSourceUrl = 'https://www.bixiabook.com/'
 def yuan(bookSourceUrl):
     if bookSourceUrl[-1]=='/':
         bookSourceUrl=bookSourceUrl[:-1]
@@ -85,16 +85,37 @@ def Name(bookSourceName):
     bookSourceName = bookSourceName.split('(')[0] 
     bookSourceName = bookSourceName.split('（')[0] 
     return bookSourceName
-    
+#检测网站标题
+def Title(bookSourceUrl):
+    headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36 Edg/100.0.1185.44'}
+    try:
+        resp = requests.get(bookSourceUrl,headers=headers,timeout=10)
+        #resp = resp.apparent_encoding
+        resp.encoding = resp.apparent_encoding 
+        html = resp.text
+        title = re.findall('<title>(.*?)</title>', html)[0]
+    except:
+        title = '未链接成功'
+    with open('website.md','a',encoding='utf-8') as f:
+        f.write('| %s    | %s    |\n'%(title,bookSourceUrl))
+    return title
+#Markdown初始化
+def md():
+    with open('website.md','a',encoding='utf-8') as f:
+        f.write('| 标题    | 网址    |'+'\n'+' | ---- | ---- | '+'\n')
+md()
 #特殊字符
-olds = ['Ⓢ',' ','②','🔸','①','③','⑮','④','⑧','⑨','⑪','📜','💰', '🌾', '💫', '💰', '🔞', '💡',  '🐳', '✐', '🧾' ,'📒' ,'☆' ,'🈲' ,'📖', '❎', '☘️','📗','📙',
+olds = ['Ⓢ',' ','②','🔸','①','③','⑮','④','⑧','⑨pp','⑪','📜','💰', '🌾', '💫', '💰', '🔞', '💡',  '🐳', '✐', '🧾' ,'📒' ,'☆' ,'🈲' ,'📖', '❎', '☘️','📗','📙',
         '🍩','🎉','🏷','🌸','🍅','🎊','👍','🎈','🔥','📚','📰','💜','📥','💗','🔰','👿']
 news = ['' for i in olds]
 
-url = 'https://shuyuan.mgz6.cc/shuyuan/a3231337446afe1ea5179b02737a8980.json'
+url = 'https://shuyuan.mgz6.cc/shuyuan/dfab9780b5df159a208ad38e9f369db9.json'
 data = pd.read_json(url)
-#删除 源注释Comment
+rows = data.shape[0]
+print('检测到%s条数据'%rows)
+#源注释Comment
 data['bookSourceComment'] = ''
+#data['bookSourceComment'] = [Title(bookSourceUrl) for bookSourceUrl in data['bookSourceUrl']]
 #删除bookSourceUrl 签名
 data['bookSourceUrl'] =[ i.split('#')[0] for i in data['bookSourceUrl']]
 #书源名替换
@@ -109,11 +130,51 @@ for bookSource in data['bookSourceGroup'] :
 data['bookSourceGroup']  = bookSourceList
 #源URL
 data['bookSourceUrl'] =[yuan(i) for i in data['bookSourceUrl']]
+
+#删除搜索链接为空的源
+for row in data.itertuples():
+    searchUrl = row.searchUrl
+    if searchUrl == '':
+        data.drop(row.Index, inplace=True)
+#精简源
+bookUrlPatternList = [] #书籍Url正则
+exploreUrlList = [] #发现
+loginUrlList = [] #登录
+searchUrlList = [] #搜索
+for row in data.itertuples():
+    bookSourceUrl = row.bookSourceUrl
+    bookUrlPattern = row.bookUrlPattern
+    try:
+        bookUrlPattern = bookUrlPattern.replace(bookSourceUrl,'')
+    except:
+        bookUrlPattern = ''
+    bookUrlPatternList.append(bookUrlPattern)
+    loginUrl = row.loginUrl
+    try:
+        loginUrl = loginUrl.replace(bookSourceUrl,'')
+    except:
+        loginUrl = ''
+    loginUrlList.append(loginUrl)
+    searchUrl = row.searchUrl
+    try:
+        searchUrl = searchUrl.replace(bookSourceUrl,'')
+    except:
+        searchUrl = ''
+    searchUrlList.append(searchUrl)
+    exploreUrl = row.exploreUrl
+    try:
+        exploreUrl = exploreUrl.replace(bookSourceUrl,'')
+    except:
+        exploreUrl = ''
+    exploreUrlList.append(exploreUrl)
+data['bookUrlPattern'] = bookUrlPatternList
+data['exploreUrl'] = exploreUrlList
+data['searchUrl'] = searchUrlList
+data['loginUrl'] = loginUrlList
+
+
 #删除源Url相同数值
 data = data.drop_duplicates('bookSourceUrl',keep='first')
-#源Url重新排序
-data.sort_values("bookSourceName",inplace=True)
 #保存
 data.to_json('bookSource.json',orient='records',force_ascii=False,lines=False,indent=4)
-
-
+#s = [Title(bookSourceUrl) for bookSourceUrl in data['bookSourceUrl']]
