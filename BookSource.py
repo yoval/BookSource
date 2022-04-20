@@ -142,7 +142,9 @@ exploreUrlList = [] #发现
 loginUrlList = [] #登录
 searchUrlList = [] #搜索
 sourceCommentList = [] #备注
+bookSourceGroupList = [] #书籍分组
 for row in data.itertuples():
+    bookSourceGroup = row.bookSourceGroup
     bookSourceUrl = row.bookSourceUrl
     bookUrlPattern = row.bookUrlPattern
     try:
@@ -165,11 +167,10 @@ for row in data.itertuples():
         except:
             searchUrl = ''
     if 'https' in searchUrl:
-        sourceComment = '搜索可精简'
+        bookSourceGroup = '搜索可精简'
     else:
-        sourceComment = ''
-    sourceCommentList.append(sourceComment)
-    
+        bookSourceGroup = ''
+    bookSourceGroupList.append(bookSourceGroup)
     searchUrlList.append(searchUrl)
     exploreUrl = row.exploreUrl
     try:
@@ -177,12 +178,14 @@ for row in data.itertuples():
     except:
         exploreUrl = ''
     exploreUrlList.append(exploreUrl)
+    
+    
 data['bookUrlPattern'] = bookUrlPatternList
 data['exploreUrl'] = exploreUrlList
 data['searchUrl'] = searchUrlList
 data['loginUrl'] = loginUrlList
-data['sourceComment'] = sourceCommentList
 
+data['bookSourceGroup'] = bookSourceGroupList
 #删除源Url相同数值
 data = data.drop_duplicates('bookSourceUrl',keep='first')
 #保存
