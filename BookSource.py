@@ -186,7 +186,6 @@ data['searchUrl'] = searchUrlList
 data['loginUrl'] = loginUrlList
 data['bookSourceGroup'] = bookSourceGroupList
 #删除源Url相同数值
-#data = data.drop_duplicates('bookSourceUrl',keep='first')
 bookSourceUrlList = []
 for row in data.itertuples():
     bookSourceUrl = row.bookSourceUrl
