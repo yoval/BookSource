@@ -109,13 +109,12 @@ olds = ['Ⓢ',' ','②','🔸','①','③','⑮','④','⑧','⑨pp','⑪','📜
         '🍩','🎉','🏷','🌸','🍅','🎊','👍','🎈','🔥','📚','📰','💜','📥','💗','🔰','👿']
 news = ['' for i in olds]
 
-url = 'https://shuyuan.mgz6.cc/shuyuan/dfab9780b5df159a208ad38e9f369db9.json'
+url = 'https://shuyuan.mgz6.cc/shuyuan/6ad7a39be02a54ea175f3cc8fc94b7a8.json'
 data = pd.read_json(url)
 rows = data.shape[0]
 print('检测到%s条数据'%rows)
 #源注释Comment
 data['bookSourceComment'] = ''
-#data['bookSourceComment'] = [Title(bookSourceUrl) for bookSourceUrl in data['bookSourceUrl']]
 #删除bookSourceUrl 签名
 data['bookSourceUrl'] =[ i.split('#')[0] for i in data['bookSourceUrl']]
 #书源名替换
@@ -143,6 +142,7 @@ loginUrlList = [] #登录
 searchUrlList = [] #搜索
 sourceCommentList = [] #备注
 bookSourceGroupList = [] #书籍分组
+bookSourceUrlList = []
 for row in data.itertuples():
     bookSourceGroup = row.bookSourceGroup
     bookSourceUrl = row.bookSourceUrl
@@ -168,6 +168,7 @@ for row in data.itertuples():
             searchUrl = ''
     if 'https' in searchUrl:
         bookSourceGroup = '搜索可精简'
+        bookSourceGroup = ''
     else:
         bookSourceGroup = ''
     bookSourceGroupList.append(bookSourceGroup)
@@ -178,16 +179,22 @@ for row in data.itertuples():
     except:
         exploreUrl = ''
     exploreUrlList.append(exploreUrl)
-    
-    
+
 data['bookUrlPattern'] = bookUrlPatternList
 data['exploreUrl'] = exploreUrlList
 data['searchUrl'] = searchUrlList
 data['loginUrl'] = loginUrlList
-
 data['bookSourceGroup'] = bookSourceGroupList
 #删除源Url相同数值
-data = data.drop_duplicates('bookSourceUrl',keep='first')
+#data = data.drop_duplicates('bookSourceUrl',keep='first')
+bookSourceUrlList = []
+for row in data.itertuples():
+    bookSourceUrl = row.bookSourceUrl
+    if bookSourceUrl in bookSourceUrlList or bookSourceUrl.replace('http','https') in bookSourceUrlList or bookSourceUrl.replace('http','https') in bookSourceUrlList:
+        data.drop(row.Index, inplace=True)
+        print('删除重复值')
+    else:
+        bookSourceUrlList.append(bookSourceUrl)
 #保存
 data.to_json('bookSource.json',orient='records',force_ascii=False,lines=False,indent=4)
 #s = [Title(bookSourceUrl) for bookSourceUrl in data['bookSourceUrl']]
