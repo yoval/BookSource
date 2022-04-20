@@ -90,7 +90,6 @@ def Title(bookSourceUrl):
     headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36 Edg/100.0.1185.44'}
     try:
         resp = requests.get(bookSourceUrl,headers=headers,timeout=10)
-        #resp = resp.apparent_encoding
         resp.encoding = resp.apparent_encoding 
         html = resp.text
         title = re.findall('<title>(.*?)</title>', html)[0]
@@ -111,6 +110,29 @@ news = ['' for i in olds]
 
 url = 'https://fuwenyue.coding.net/p/yuedu/d/BookSource/git/raw/master/bookSource.json'
 data = pd.read_json(url)
+'''
+YuanList = [
+    'https://fuwenyue.coding.net/p/yuedu/d/BookSource/git/raw/master/bookSource.json',
+    'https://shuyuan.mgz6.cc/shuyuan/424e79df768f2fb936e65bed1967b07f.json',
+    'http://www.yckceo1.com/d/zUPa9',
+    'http://www.yckceo1.com/d/Tq61A',
+    'http://www.yckceo1.com/d/XctAY',
+    'http://www.yckceo1.com/d/9Jdd8',
+    'http://www.yckceo1.com/d/K7DJr',
+    'http://www.yckceo1.com/d/u7kQh',
+    'http://www.yckceo1.com/d/3GpXX',
+    
+    ]
+
+yuan_df = pd.DataFrame()
+for oneyuan in YuanList:
+    yuan_df1= pd.read_json(oneyuan)
+    yuan_df = pd.concat([yuan_df,yuan_df1])
+
+data = yuan_df
+del yuan_df
+print('全部书源读取成功')
+'''
 rows = data.shape[0]
 print('检测到%s条数据'%rows)
 #源注释Comment
@@ -189,16 +211,17 @@ data['bookSourceGroup'] = bookSourceGroupList
 bookSourceUrlList = []
 for row in data.itertuples():
     bookSourceUrl = row.bookSourceUrl
+    print(bookSourceUrl)
     if bookSourceUrl in bookSourceUrlList or bookSourceUrl.replace('http','https') in bookSourceUrlList or bookSourceUrl.replace('http','https') in bookSourceUrlList:
         data.drop(row.Index, inplace=True)
-        print('删除重复值')
+        print('重复值，删除')
     else:
         bookSourceUrlList.append(bookSourceUrl)
         try: #删除相应时间大于10秒
             resp = requests.get(bookSourceUrl,timeout=10)
         except:
             data.drop(row.Index, inplace=True)
-            print('相应时间长，删除')
+            print('响应时间长，删除')
 #保存
 data.to_json('bookSource.json',orient='records',force_ascii=False,lines=False,indent=4)
 #s = [Title(bookSourceUrl) for bookSourceUrl in data['bookSourceUrl']]
