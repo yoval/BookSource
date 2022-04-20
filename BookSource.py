@@ -109,7 +109,7 @@ olds = ['Ⓢ',' ','②','🔸','①','③','⑮','④','⑧','⑨pp','⑪','📜
         '🍩','🎉','🏷','🌸','🍅','🎊','👍','🎈','🔥','📚','📰','💜','📥','💗','🔰','👿']
 news = ['' for i in olds]
 
-url = 'https://shuyuan.mgz6.cc/shuyuan/6ad7a39be02a54ea175f3cc8fc94b7a8.json'
+url = 'https://fuwenyue.coding.net/p/yuedu/d/BookSource/git/raw/master/bookSource.json'
 data = pd.read_json(url)
 rows = data.shape[0]
 print('检测到%s条数据'%rows)
@@ -194,6 +194,11 @@ for row in data.itertuples():
         print('删除重复值')
     else:
         bookSourceUrlList.append(bookSourceUrl)
+        try: #删除相应时间大于10秒
+            resp = requests.get(bookSourceUrl,timeout=10)
+        except:
+            data.drop(row.Index, inplace=True)
+            print('相应时间长，删除')
 #保存
 data.to_json('bookSource.json',orient='records',force_ascii=False,lines=False,indent=4)
 #s = [Title(bookSourceUrl) for bookSourceUrl in data['bookSourceUrl']]
