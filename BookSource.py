@@ -108,31 +108,8 @@ olds = ['Ⓢ',' ','②','🔸','①','③','⑮','④','⑧','⑨pp','⑪','📜
         '🍩','🎉','🏷','🌸','🍅','🎊','👍','🎈','🔥','📚','📰','💜','📥','💗','🔰','👿']
 news = ['' for i in olds]
 
-url = 'https://fuwenyue.coding.net/p/yuedu/d/BookSource/git/raw/master/bookSource.json'
+url = 'https://shuyuan.mgz6.cc/shuyuan/3c40392651bdfd271c6a24e445ecdd77.json'
 data = pd.read_json(url)
-'''
-YuanList = [
-    'https://fuwenyue.coding.net/p/yuedu/d/BookSource/git/raw/master/bookSource.json',
-    'https://shuyuan.mgz6.cc/shuyuan/424e79df768f2fb936e65bed1967b07f.json',
-    'http://www.yckceo1.com/d/zUPa9',
-    'http://www.yckceo1.com/d/Tq61A',
-    'http://www.yckceo1.com/d/XctAY',
-    'http://www.yckceo1.com/d/9Jdd8',
-    'http://www.yckceo1.com/d/K7DJr',
-    'http://www.yckceo1.com/d/u7kQh',
-    'http://www.yckceo1.com/d/3GpXX',
-    
-    ]
-
-yuan_df = pd.DataFrame()
-for oneyuan in YuanList:
-    yuan_df1= pd.read_json(oneyuan)
-    yuan_df = pd.concat([yuan_df,yuan_df1])
-
-data = yuan_df
-del yuan_df
-print('全部书源读取成功')
-'''
 rows = data.shape[0]
 print('检测到%s条数据'%rows)
 #源注释Comment
