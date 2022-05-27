@@ -4,8 +4,6 @@
 
 `https://fuwenyue.coding.net/p/yuedu/d/BookSource/git/raw/master/bookSource.json`
 
-网站列表：[website.md](website.md)
 
 
-
-![](https://gitee.com/fuwenyue/tuchuang/raw/master/1650289279574bookSource.png)
+![](https://s3.bmp.ovh/imgs/2022/05/27/dddde7ef2ff09d12.png)
