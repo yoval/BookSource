@@ -79,6 +79,7 @@ def yuan(bookSourceUrl):
     if bookSourceUrl[-1]=='/':
         bookSourceUrl=bookSourceUrl[:-1]
     return bookSourceUrl
+
 #网站名称
 bookSourceName = '飞卢小说(分类最全)'
 def Name(bookSourceName):
@@ -98,18 +99,15 @@ def Title(bookSourceUrl):
     with open('website.md','a',encoding='utf-8') as f:
         f.write('| %s    | %s    |\n'%(title,bookSourceUrl))
     return title
-#Markdown初始化
-def md():
-    with open('website.md','a',encoding='utf-8') as f:
-        f.write('| 标题    | 网址    |'+'\n'+' | ---- | ---- | '+'\n')
-md()
 #特殊字符
 olds = ['Ⓢ',' ','②','🔸','①','③','⑮','④','⑧','⑨pp','⑪','📜','💰', '🌾', '💫', '💰', '🔞', '💡',  '🐳', '✐', '🧾' ,'📒' ,'☆' ,'🈲' ,'📖', '❎', '☘️','📗','📙',
         '🍩','🎉','🏷','🌸','🍅','🎊','👍','🎈','🔥','📚','📰','💜','📥','💗','🔰','👿']
 news = ['' for i in olds]
 
-url = 'https://shuyuan.mgz6.cc/shuyuan/3c40392651bdfd271c6a24e445ecdd77.json'
+url = 'https://shuyuan.mgz6.cc/shuyuan/bf2151831eb2ffd65df88e2159f36f68.json'
 data = pd.read_json(url)
+print('文件读取成功！')
+
 rows = data.shape[0]
 print('检测到%s条数据'%rows)
 #源注释Comment
@@ -192,6 +190,7 @@ for row in data.itertuples():
     if bookSourceUrl in bookSourceUrlList or bookSourceUrl.replace('http','https') in bookSourceUrlList or bookSourceUrl.replace('http','https') in bookSourceUrlList:
         data.drop(row.Index, inplace=True)
         print('重复值，删除')
+        continue
     else:
         bookSourceUrlList.append(bookSourceUrl)
         try: #删除相应时间大于10秒
@@ -199,6 +198,11 @@ for row in data.itertuples():
         except:
             data.drop(row.Index, inplace=True)
             print('响应时间长，删除')
+            continue
+    #搜索链接
+    searchUrl = row.searchUrl
+    if  len(searchUrl) ==0:
+        data.drop(row.Index, inplace=True)
+        print('搜索为空，删除')
 #保存
 data.to_json('bookSource.json',orient='records',force_ascii=False,lines=False,indent=4)
-#s = [Title(bookSourceUrl) for bookSourceUrl in data['bookSourceUrl']]
