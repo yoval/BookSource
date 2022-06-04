@@ -104,7 +104,7 @@ olds = ['Ⓢ',' ','②','🔸','①','③','⑮','④','⑧','⑨pp','⑪','📜
         '🍩','🎉','🏷','🌸','🍅','🎊','👍','🎈','🔥','📚','📰','💜','📥','💗','🔰','👿']
 news = ['' for i in olds]
 
-url = 'https://shuyuan.mgz6.cc/shuyuan/bf2151831eb2ffd65df88e2159f36f68.json'
+url = 'https://shuyuan.mgz6.cc/shuyuan/8470daf8239285f106d1cda048b21c28.json'
 data = pd.read_json(url)
 print('文件读取成功！')
 
