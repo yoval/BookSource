@@ -74,6 +74,8 @@ def replaceMulti(text: str, olds: list, news: list):
 #源Url
 bookSourceUrl = 'https://www.bixiabook.com/'
 def yuan(bookSourceUrl):
+    if bookSourceUrl =='':
+        return bookSourceUrl == 'del'
     if bookSourceUrl[-1]=='/':
         bookSourceUrl=bookSourceUrl[:-1]
     if bookSourceUrl[-1]=='/':
@@ -104,7 +106,7 @@ olds = ['Ⓢ',' ','②','🔸','①','③','⑮','④','⑧','⑨','⑪','📜',
         '🍩','🎉','🏷','🌸','🍅','🎊','👍','🎈','🔥','📚','📰','💜','📥','💗','🔰','👿','🌼','✈️']
 news = ['' for i in olds]
 
-url = 'https://shuyuan.mgz6.cc/shuyuan/bc05c22871ceda433f9e18ffa11e22a6.json'
+url = 'http://shuyuan.mgz6.cc/shuyuan/7684ef65ac33f8f7e98dcef3f6a532cf.json'
 data = pd.read_json(url)
 print('文件读取成功！')
 
