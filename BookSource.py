@@ -106,7 +106,7 @@ olds = ['🎋','🌙','🍑','💦','💯','⑱','⓪','⑲','⑥','⑤','🍁',
         '🍩','🎉','🏷','🌸','🍅','🎊','👍','🎈','🔥','📚','📰','💜','📥','💗','🔰','👿','🌼','✈️']
 news = ['' for i in olds]
 
-url = 'http://shuyuan.mgz6.cc/shuyuan/2d8bca4d15f5964f2cebb5340b317b02.json'
+url = 'https://yun.bizha.top/d/One/shareBookSource.json'
 data = pd.read_json(url)
 print('文件读取成功！')
 
