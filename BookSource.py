@@ -41,20 +41,6 @@ def replaceFomat(text: str, word: str, n: int,reverse=False):
     else:
         raise TypeError
 def replaceMulti(text: str, olds: list, news: list):
-    '''一次替换多组字符串
-    Params:
-    ---
-    text
-        要替换的文本
-    olds
-        旧字符串列表
-    news
-        新字符串列表
-    Return:
-    ---
-    new_text: str
-        替换后的文本
-    '''
     if len(olds) != len(news):
         raise IndexError
     else:
